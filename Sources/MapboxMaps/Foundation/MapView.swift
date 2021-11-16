@@ -67,6 +67,8 @@ open class MapView: UIView {
 
     private let cameraViewContainerView = UIView()
 
+    private let horizonView = UIView()
+
     /// Resource options for this map view
     internal private(set) var resourceOptions: ResourceOptions!
 
@@ -260,6 +262,13 @@ open class MapView: UIView {
 
         // Set up managers
         setupManagers()
+
+        horizonView.backgroundColor = .red
+        horizonView.frame.size.height = 5
+        horizonView.frame.size.width = bounds.width
+        horizonView.frame.origin = .zero
+        horizonView.autoresizingMask = [.flexibleWidth, .flexibleBottomMargin]
+        addSubview(horizonView)
     }
 
     internal func setupManagers() {
@@ -358,6 +367,8 @@ open class MapView: UIView {
         if window == nil {
             return
         }
+
+        horizonView.frame.origin.y = mapboxMap.horizonLineFromTop - horizonView.frame.height / 2
 
         updateHeadingOrientationIfNeeded()
 
@@ -522,5 +533,23 @@ extension MapView: DisplayLinkCoordinator {
 
     func remove(_ participant: DisplayLinkParticipant) {
         displayLinkParticipants.remove(participant)
+    }
+}
+
+
+extension MapboxMap {
+    var centerOffset: CGPoint {
+        return CGPoint(
+            x: 0.5 * (cameraState.padding.left - cameraState.padding.right),
+            y: 0.5 * (cameraState.padding.top - cameraState.padding.bottom))
+    }
+
+    var horizonLineFromTop: CGFloat {
+        let fov = 0.6435011087932844
+        // h is height of space above map center to horizon.
+        let h = size.height / 2.0 / tan(fov / 2.0) / tan(max(cameraState.pitch * .pi / 180, 0.1)) + centerOffset.y
+        // incorporate 3% of the area above center to account for reduced precision.
+        let kHorizonEpsilon = 0.03
+        return size.height / 2.0 - h * (1.0 - kHorizonEpsilon)
     }
 }
