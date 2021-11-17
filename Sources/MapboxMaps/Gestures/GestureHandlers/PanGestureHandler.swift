@@ -81,19 +81,22 @@ internal final class PanGestureHandler: GestureHandler, PanGestureHandlerProtoco
                       delegate?.gestureEnded(for: .pan, willAnimate: false)
                       return
                   }
+            let releaseTouchLocation = touchLocation
+            // Set the dragging origin always to the bottom of screen.
+            let velocity = gestureRecognizer.velocity(in: view)
             var previousDecelerationLocation = touchLocation
+            previousDecelerationLocation.y = mapboxMap.size.height
             cameraAnimationsManager.decelerate(
-                location: touchLocation,
-                velocity: gestureRecognizer.velocity(in: view),
-                decelerationFactor: decelerationFactor,
-                locationChangeHandler: { (touchLocation) in
+                location: previousDecelerationLocation,
+                velocity: velocity,
+                decelerationFactor: decelerationFactor * 0.97,
+                locationChangeHandler: { (touch) in
                     let clampedTouchLocation = self.clampTouchLocation(
-                        touchLocation,
+                        touch,
                         previousTouchLocation: previousDecelerationLocation)
                     self.handleChange(
                         withTouchLocation: clampedTouchLocation,
                         previousTouchLocation: previousDecelerationLocation)
-                    previousDecelerationLocation = clampedTouchLocation
                 },
                 completion: { [mapboxMap] in
                     mapboxMap.dragEnd()

@@ -548,8 +548,7 @@ extension MapboxMap {
         let fov = 0.6435011087932844
         // h is height of space above map center to horizon.
         let h = size.height / 2.0 / tan(fov / 2.0) / tan(max(cameraState.pitch * .pi / 180, 0.1)) + centerOffset.y
-        // incorporate 3% of the area above center to account for reduced precision.
-        let kHorizonEpsilon = 0.03
-        return size.height / 2.0 - h * (1.0 - kHorizonEpsilon)
+        let kHorizonShift = 0.1
+        return size.height / 2.0 - h * (1.0 - kHorizonShift)
     }
 }
