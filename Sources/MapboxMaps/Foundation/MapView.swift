@@ -67,7 +67,7 @@ open class MapView: UIView {
 
     private let cameraViewContainerView = UIView()
 
-    private let horizonView = UIView()
+//    private let horizonView = UIView()
 
     /// Resource options for this map view
     internal private(set) var resourceOptions: ResourceOptions!
@@ -263,12 +263,12 @@ open class MapView: UIView {
         // Set up managers
         setupManagers()
 
-        horizonView.backgroundColor = .red
-        horizonView.frame.size.height = 5
-        horizonView.frame.size.width = bounds.width
-        horizonView.frame.origin = .zero
-        horizonView.autoresizingMask = [.flexibleWidth, .flexibleBottomMargin]
-        addSubview(horizonView)
+//        horizonView.backgroundColor = .red
+//        horizonView.frame.size.height = 5
+//        horizonView.frame.size.width = bounds.width
+//        horizonView.frame.origin = .zero
+//        horizonView.autoresizingMask = [.flexibleWidth, .flexibleBottomMargin]
+//        addSubview(horizonView)
     }
 
     internal func setupManagers() {
@@ -368,7 +368,7 @@ open class MapView: UIView {
             return
         }
 
-        horizonView.frame.origin.y = mapboxMap.horizonLineFromTop - horizonView.frame.height / 2
+//        horizonView.frame.origin.y = mapboxMap.horizonLineFromTop - horizonView.frame.height / 2
 
         updateHeadingOrientationIfNeeded()
 

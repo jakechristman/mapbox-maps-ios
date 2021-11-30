@@ -30,6 +30,8 @@ internal final class PanGestureHandler: GestureHandler, PanGestureHandlerProtoco
     /// for unit testing
     private let dateProvider: DateProvider
 
+    private var isPanning = false
+
     internal init(gestureRecognizer: UIPanGestureRecognizer,
                   mapboxMap: MapboxMapProtocol,
                   cameraAnimationsManager: CameraAnimationsManagerProtocol,
@@ -51,11 +53,21 @@ internal final class PanGestureHandler: GestureHandler, PanGestureHandlerProtoco
 
         switch gestureRecognizer.state {
         case .began:
+            guard !pointIsAboveHorizon(touchLocation) else {
+                return
+            }
             previousTouchLocation = touchLocation
             mapboxMap.dragStart(for: touchLocation)
             delegate?.gestureBegan(for: .pan)
+            isPanning = true
         case .changed:
             guard let previousTouchLocation = previousTouchLocation else {
+                if !pointIsAboveHorizon(touchLocation) {
+                    self.previousTouchLocation = touchLocation
+                    mapboxMap.dragStart(for: touchLocation)
+                    delegate?.gestureBegan(for: .pan)
+                    isPanning = true
+                }
                 return
             }
             lastChangedDate = dateProvider.now
@@ -74,13 +86,19 @@ internal final class PanGestureHandler: GestureHandler, PanGestureHandlerProtoco
             // is just the result of manual tuning.
             let decelerationTimeout: TimeInterval = 1.0 / 30.0
             guard let lastChangedDate = lastChangedDate,
+                  isPanning,
+                  !pointIsAboveHorizon(touchLocation),
                   dateProvider.now.timeIntervalSince(lastChangedDate) < decelerationTimeout else {
                       previousTouchLocation = nil
                       self.lastChangedDate = nil
-                      mapboxMap.dragEnd()
-                      delegate?.gestureEnded(for: .pan, willAnimate: false)
+                      if isPanning {
+                          mapboxMap.dragEnd()
+                          delegate?.gestureEnded(for: .pan, willAnimate: false)
+                      }
+                      isPanning = false
                       return
                   }
+            isPanning = false
             // Set the dragging origin always to the bottom of screen.
             let velocity = gestureRecognizer.velocity(in: view)
             // Tilted map horizontal movement needs to be adjusted to behave similar
@@ -113,8 +131,11 @@ internal final class PanGestureHandler: GestureHandler, PanGestureHandlerProtoco
             // no deceleration
             previousTouchLocation = nil
             lastChangedDate = nil
-            mapboxMap.dragEnd()
-            delegate?.gestureEnded(for: .pan, willAnimate: false)
+            if isPanning {
+                mapboxMap.dragEnd()
+                delegate?.gestureEnded(for: .pan, willAnimate: false)
+            }
+            isPanning = false
         default:
             break
         }
@@ -136,5 +157,15 @@ internal final class PanGestureHandler: GestureHandler, PanGestureHandlerProtoco
             to: mapboxMap.dragCameraOptions(
                 from: previousTouchLocation,
                 to: touchLocation))
+    }
+
+    private func pointIsAboveHorizon(_ point: CGPoint) -> Bool {
+        let topMargin = 0.04 * mapboxMap.size.height
+        let reprojectErrorMargin = min(10, topMargin / 2)
+        var p = point
+        p.y -= topMargin
+        let coordinate = mapboxMap.coordinate(for: p)
+        let roundtripPoint = mapboxMap.point(for: coordinate)
+        return roundtripPoint.y >= p.y + reprojectErrorMargin
     }
 }
