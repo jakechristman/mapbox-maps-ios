@@ -19,6 +19,8 @@ internal protocol MapboxMapProtocol: AnyObject {
     func endGesture()
     @discardableResult
     func onEvery(_ eventType: MapEvents.EventKind, handler: @escaping (Event) -> Void) -> Cancelable
+    func coordinate(for point: CGPoint) -> CLLocationCoordinate2D
+    func point(for coordinate: CLLocationCoordinate2D) -> CGPoint
 }
 
 public final class MapboxMap: MapboxMapProtocol {
