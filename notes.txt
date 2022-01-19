@@ -1,0 +1,22 @@
+### Dependency requirements:
+
+* Compatible version of MapboxCoreMaps:
+* Compatible version of MapboxCommon:
+* Compatible version of Xcode:
+* Compatible version of macOS:
+
+### Changes
+
+<Compose changelog here>
+
+### Dependencies
+- [GL Native](https://github.com/mapbox/mapbox-gl-native-internal/releases/tag/maps-v10.3.0-beta.1)
+- [Common](https://github.com/mapbox/mapbox-sdk-common/releases/tag/v21.1.0-beta.1)
+
+### Direct download
+
+Link to download binaries (append your own Mapbox access token [scoped with `DOWNLOADS:READ`](https://account.mapbox.com/)):
+
+```
+https://api.mapbox.com/downloads/v2/mobile-maps-ios/releases/ios/0.1.0-beta.1/MapboxMaps.zip?access_token=<access-token>
+```
